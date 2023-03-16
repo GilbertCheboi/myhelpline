@@ -1,0 +1,297 @@
+{% extends "helpline/base.html" %}
+{% load i18n %}
+{% load selectable_tags %}
+{% include_jquery_libs %}
+{% include_ui_theme %}
+
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+
+{% block navbar_nav %}
+{% endblock navbar_nav %}
+
+{% block box %}
+<section class="content-header">
+  <h1 style="text-transform: capitalize;">
+    {{ loaded_form.name }} Form
+  </h1>
+  <ol class="breadcrumb">
+    <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+    <li><a href="#">Forms</a></li>
+    <li class="active">{{ form_name }}</li>
+  </ol>
+</section>
+{% endblock box %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'jquery-ui/themes/ui-lightness/jquery-ui.css' %}" type="text/css" />
+<link href="{% static 'selectable/css/dj.selectable.css' %}" type="text/css" media="all" rel="stylesheet" />
+<script src="{% static 'jquery-ui/ui/jquery-ui.js' %}"></script>
+<script type="text/javascript" src="{% static 'selectable/js/jquery.dj.selectable.js' %}"></script>
+{% endblock head %}
+{% block content %}
+
+<style type="text/css">
+audio{
+  margin:-30px 10px;
+}
+</style>
+
+
+<script type='text/javascript'>
+  $(function(){
+    $('select[name=sub_category]').empty();
+    $('select[name=sub_category]').prepend('<option value="Not selected" selected disabled>Select Category...</option>');
+    $('select[name=sub_sub_category]').empty();
+    $('select[name=sub_sub_category]').prepend('<option value="Not selected" selected disabled>Select a Sub-Category...</option>');
+  // called when category field changes from initial value
+  $('select[name=category]').change(function(){
+
+    if($("#id_category option:selected").text()) {
+      category_id = $('select[name=category]').val();
+
+      request_url = '/helpline/ajax/get_subcategory/' + category_id + '/';
+      $.ajax({
+        url: request_url,
+        type: "GET",
+        success: function(data){
+          $('select[name=sub_category]').empty();
+          $.each(data.data, function(key, value){
+            $('select[name=sub_category]').append('<option value="' + value.chlsubcategory + '">' + value.chlsubcategory + '</option>');
+          });
+        }
+      })
+    }
+  })
+  $('select[name=sub_category]').change(function(){
+
+    if($("#id_sub_category option:selected").text()) {
+      sub_category_id = $('select[name=sub_category]').val();
+
+      request_url = '/helpline/ajax/get_sub_subcategory/' + sub_category_id + '/';
+      $.ajax({
+        url: request_url,
+        type: "GET",
+        success: function(data){
+          $('select[name=sub_sub_category]').empty();
+          $.each(data.data, function(key, value){
+            $('select[name=sub_sub_category]').append('<option value="' + value.chlsubsubcat + '">' + value.chlsubsubcat + '</option>');
+          });
+        }
+      })
+    }
+  })
+});
+</script>
+
+<script type="text/javascript">
+
+  function createCase(contact_id){
+    var values = {
+        'csrfmiddlewaretoken': '{{ csrf_token }}',
+        'contact_id': contact_id
+    }
+    $.ajax({
+      url: "{% url 'contact_create_case' %}",
+      type: "POST",
+      data: values,
+      success: function(data) {
+        if (!(data['success'])) {
+            // Here we replace the form, for the
+            $(contact_form).replaceWith(data['form_html']);
+          }
+          else {
+            // Here you can show the user a success message or do whatever you need
+            //$(example_form).find('.success-message').show();
+            $("#success-message").html("Success");
+
+          }
+        },
+        error: function () {
+        //$(case_form).find('.error-message').show()
+        $("#error-message").html("Error");
+      }
+    });
+  }
+
+  function contactSearch(){
+
+    var contact_search_form = '#contact-search-form';
+    var form = $("#contact-search-form")[0]
+    var name = form['name'].value
+    var telephone = form['telephone'].value
+
+    get_submissions(telephone,name)
+
+
+
+    /*$.ajax({
+      url: "{% url 'contact_search_form' %}",
+      type: "POST",
+      data: $("#contact-search-form").serialize(),
+      success: function(data) {
+        if (!(data['success'])) {
+            // Here we replace the form, for the
+            $("#contact-search-form").html(data['form_html']);
+          }
+          else {
+            // Here you can show the user a success message or do whatever you need
+            //$(example_form).find('.success-message').show();
+            $("#success-message").html("Success");
+            $("#contact-search-results").html(data['table_html']);
+
+          }
+        },
+        error: function () {
+        //$(case_form).find('.error-message').show()
+        $("#error-message").html("Error");
+      }
+    });*/
+  }
+
+  function saveContact(){
+    var contact_form = '#contactDet';
+
+    $.ajax({
+      url: "{% url 'save_contact_form' %}",
+      type: "POST",
+      data: $("#contactDet").serialize(),
+      success: function(data) {
+        if (!(data['success'])) {
+            // Here we replace the form, for the
+            $(contact_form).replaceWith(data['form_html']);
+          }
+          else {
+            // Here you can show the user a success message or do whatever you need
+            //$(example_form).find('.success-message').show();
+            $("#success-message").html("Success");
+            $('#contactDet').trigger('reinitialize.areYouSure');
+
+          }
+        },
+        error: function () {
+        //$(case_form).find('.error-message').show()
+        $("#error-message").html("Error");
+      }
+    });
+  }
+
+
+  function saveCaseAction(){
+    var case_action_form = '#caseAction';
+
+    $.ajax({
+      url: "{% url 'save_case_action' %}",
+      type: "POST",
+      data: $("#caseAction").serialize(),
+      success: function(data) {
+        if (!(data['success'])) {
+            // Here we replace the form, for the
+            $(case_action_form).replaceWith(data['form_html']);
+          }
+          else {
+            // Here you can show the user a success message or do whatever you need
+            $("#success-message").html("Success");
+            window.location.href = "{% url "dashboard_home" %}";
+
+          }
+        },
+        error: function () {
+        $("#error-message").html("Error");
+      }
+    });
+  }
+
+
+  function disposeCase(param){
+    var dispose_form = '#disposeDet';
+
+    $.ajax({
+      url: "{% url 'save_disposition_form' %}",
+      type: "POST",
+      data: $("#disposeDet").serialize(),
+      success: function(data) {
+        if (!(data['success'])) {
+          $(dispose_form).replaceWith(data['form_html']);
+        }
+        else{
+          closeOverlay();
+        }
+      },
+      error: function() {
+        $("#error-message").html("Error");
+      }
+    });
+  }
+
+  function closeOverlay(){
+    top.window.location.href = '{% url "dashboard_home" %}';
+  }
+
+
+</script>
+<!-- Modal -->
+<div class="modal fade"  id="case_form_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document" style="width: 80%;">
+    <div class="modal-content">
+        <div class="modal-header bg-light-blue-active">
+          <!--button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button-->
+          <a href="{% url 'dashboard_home' %}" class="close" style="color:#ffffff;"><span aria-hidden="true">&times;</span></a>
+          <h4 class="modal-title" id="myModalLabel">{% trans "Form" %} > {{ form_name }}| Case ID:
+              <span id="caseid">{{ case }}</span>
+              > 
+            {% if form_name == 'qa' %}
+            <span class="pull-right">
+              <audio controls autoplay="autoplay">
+                <source src="horse.ogg" type="audio/ogg" />
+                <source src="" type="audio/mpeg" />
+              </audio> 
+            </span>
+            {% else %}
+            <span class="pull-right" id="formTimer" style="font-size: 24px; color: #fff; margin-right: 30px;">00:00:00</span>
+            {% endif %}
+          <h4>
+
+          </div>
+          <div class="modal-body" style="padding: 0px; height: 80vh;" ><!-- -->
+          <div id="frame_iframes">
+            <div id="frame_iframe">
+              <iframe src="{{ iframe_url }}&d[owner_level]={{owner_role}}" id="helpline-forms" style="width: 100%; height: 80vh; border: none;"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+<!--END FORMs-->
+
+</div>
+<script>
+  sessionStorage.setItem("on_case", 1);
+  window.addEventListener("message", receiveMessage, false);
+
+  function receiveMessage(event)
+  {
+    if(event.data){
+      var resp = JSON.parse(event.data)
+      if(resp.enketoEvent == 'submissionsuccess'){
+        sessionStorage.setItem("on_case", 0);
+        window.location = '/helpline'
+      }
+    }
+    sessionStorage.setItem("on_case", 0);
+  }
+</script>
+<script>
+  $(function() {
+    $('#contactDet').areYouSure(
+      {
+        message: 'It looks like you have been editing something. '
+               + 'If you leave before saving, your changes will be lost.'
+      }
+    );
+  });
+
+</script>
+{% endblock content %}

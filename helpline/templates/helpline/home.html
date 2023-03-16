@@ -1,0 +1,482 @@
+{% extends 'helpline/base.html' %}
+{% load i18n %}
+{% load staticfiles %}
+{% load humanize %}
+
+{% block content %}
+
+<style type="text/css">
+  .palette-item{
+    cursor:default;
+  }
+</style>
+<section class="content" style="padding-top:0px;">
+  <div class="row">
+    <div class="col-md-12">
+      <!-- /.box-footer -->
+      <!-- <section class="content-header">
+        <h1>Dashboard</h1>
+      </section -->
+      <div class="box-body" style="padding:5px; padding-top:0px;">
+        {% block box %}
+        <div class="row">
+        {% if request.user.HelplineUser.hl_role == 'Caseworker' or request.user.HelplineUser.hl_role == 'Casemanager' %}
+
+          <div class="col-md-12" >
+            <div class="row home-pallete">
+              <div class="col-sm-4 col-md-2 palette-item">
+                <div class="color-palette-set">
+                  <div class="bg-blue color-palette" align="center" onclick="window.location = '{% url 'dashboardreports' 'totalcases' 'cases' %}?datetime_range={{ home.midnight_string }} - {{ home.now_string }}'"><span style="font-size:50px; font-weight:800;">{{ home.total_submissions | default:0 }} </a></span><br>{% trans "Total Cases" %}</div>
+                </div>
+              </div>
+              <!-- /.col -->
+              <div class="col-sm-4 col-md-2 palette-item">
+                <div class="color-palette-set">
+                  <div class="bg-red color-palette" align="center" style="padding-right:5px; padding-bottom:5px;"  onclick="window.location = '{% url 'dashboardreports' 'priority' 'cases' %}?datetime_range={{ home.midnight_string }} - {{ home.now_string }}'"><span style="font-size:50px; font-weight:800;">{{ home.high_priority | default:0 }} </span><br>{% trans "High Priority Cases" %}</div>
+
+                  <!--div class="bg-light-blue-active color-palette"><span>Active</span></div-->
+                </div>
+              </div>
+              <!-- /.col -->
+              <div class="col-sm-4 col-md-2 palette-item" onclick="window.location = '{% url 'dashboardreports' 'voicemails' %}?datetime_range={{ home.midnight_string }} - {{ home.now_string }}'">
+                <div class="color-palette-set">
+                  <!--div class="bg-light-blue disabled color-palette"><span>Disabled</span></div-->
+                  <div class="bg-yellow color-palette" align="center" style="padding-right:5px; padding-bottom:5px;"   onclick="window.location = '{% url 'dashboardreports' 'closed' 'cases' %}?datetime_range={{ home.midnight_string }} - {{ home.now_string }}'"><span style="font-size:50px; font-weight:800;">{{ home.closed | default:0 }} </span><br>{% trans "Closed Cases" %}</div>
+                  <!--div class="bg-light-blue-active color-palette"><span>Active</span></div-->
+                </div>
+              </div>
+              <div class="col-sm-4 col-md-2 palette-item">
+                <div class="color-palette-set">
+                  <!--div class="bg-light-blue disabled color-palette"><span>Disabled</span></div-->
+                  <div class="bg-gray color-palette" align="center" style="padding-right:5px; padding-bottom:5px;"><span style="font-size:50px; font-weight:800;">{{ home.escalate | default:0 }}</span><br>{% trans "Escalated Cases" %}</div>
+                  <!--div class="bg-light-blue-active color-palette"><span>Active</span></div-->
+                </div>
+              </div>
+              <!-- /.col -->
+              <div class="col-sm-4 col-md-2 palette-item">
+                <div class="color-palette-set">
+                  <!--div class="bg-light-blue disabled color-palette"><span>Disabled</span></div-->
+                  <div class="bg-gray color-palette" align="center" style="padding-right:5px; padding-bottom:5px;"><span style="font-size:50px; font-weight:800;">{{ home.pending }}</span><br>{% trans "Pending Cases" %}</div>
+                  <!--div class="bg-light-blue-active color-palette"><span>Active</span></div-->
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- /.col -->
+            </div>
+          </div>
+        {% else %}
+          <div class="col-md-8" >
+            <div class="row home-pallete">
+              <div class="col-sm-4 col-md-2 palette-item">
+                <div class="color-palette-set">
+                  <div class="bg-blue color-palette" align="center" onclick="window.location = '{% url 'dashboardreports' 'totalcalls' %}?datetime_range={{ home.midnight_string }} - {{ home.now_string }}'"><span style="font-size:50px; font-weight:800;">{{ home.call.calls | default:0}} </a></span><br>{% trans "Total Calls" %}</div>
+                </div>
+              </div>
+              <!-- /.col -->
+              <div class="col-sm-4 col-md-2 palette-item">
+                <div class="color-palette-set">
+                  <div class="bg-green color-palette" align="center" style="padding-right:5px; padding-bottom:5px;" onclick="window.location = '{% url 'dashboardreports' 'answeredcalls' %}?datetime_range={{ home.midnight_string }} - {{ home.now_string }}'"><span style="font-size:50px; font-weight:800;">{{ home.call.answered | default:0}}</span><br>{% trans "Answered Calls" %}</div>
+                  <!--div class="bg-light-blue-active color-palette"><span>Active</span></div-->
+                </div>
+              </div>
+              <!-- /.col -->
+              {% if request.user.HelplineUser.hl_role != 'Counsellor' %}
+              <div class="col-sm-4 col-md-2 palette-item">
+                <div class="color-palette-set">
+                  <div class="bg-yellow color-palette" align="center" style="padding-right:5px; padding-bottom:5px;"  onclick="window.location = '{% url 'dashboardreports' 'abandonedcalls' %}?datetime_range={{ home.midnight_string }} - {{ home.now_string }}'"><span style="font-size:50px; font-weight:800;">{{ home.call.abandoned | default:0}} </span><br>{% trans "Abandoned Calls" %}</div>
+                </div>
+              </div>
+              <!-- /.col -->
+              {% endif %}
+
+              <div class="col-sm-4 col-md-2 palette-item">
+                <div class="color-palette-set">
+                  <div class="bg-red color-palette" align="center" style="padding-right:5px; padding-bottom:5px;"  onclick="window.location = '{% url 'dashboardreports' 'missedcalls' %}?datetime_range={{ home.midnight_string }} - {{ home.now_string }}'"><span style="font-size:50px; font-weight:800;">{{ home.call.missed | default:0 }} </span><br>{% trans "Missed Calls" %}</div>
+                </div>
+              </div>
+              <!-- /.col -->
+              <div class="col-sm-4 col-md-2 palette-item" onclick="window.location = '{% url 'dashboardreports' 'voicemails' %}?datetime_range={{ home.midnight_string }} - {{ home.now_string }}'">
+                <div class="color-palette-set">
+                  <!--div class="bg-light-blue disabled color-palette"><span>Disabled</span></div-->
+                  <div class="bg-aqua color-palette" align="center" style="padding-right:5px; padding-bottom:5px;"><span style="font-size:50px; font-weight:800;">{{ home.call.voicemail | default:0 }} </span><br>{% trans "Voice Mails" %}</div>
+                  <!--div class="bg-light-blue-active color-palette"><span>Active</span></div-->
+                </div>
+              </div>
+              <div class="col-sm-4 col-md-2 palette-item" onclick="window.location = '{% url 'dashboardreports' 'ivr' %}?datetime_range={{ home.midnight_string }} - {{ home.now_string }}'">
+                <div class="color-palette-set">
+                  <!--div class="bg-light-blue disabled color-palette"><span>Disabled</span></div-->
+                  <div class="bg-gray color-palette" align="center" style="padding-right:5px; padding-bottom:5px;"><span style="font-size:50px; font-weight:800;">{{ home.call.ivr | default:0 }}</span><br>{% trans "IVR Calls" %}</div>
+                  <!--div class="bg-light-blue-active color-palette"><span>Active</span></div-->
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+          </div>
+          <div class="col-md-4 qa-presence">
+            <div class="row">
+              <div class="{% if request.user.HelplineUser.hl_role == 'Supervisor' %} col-sm-3 col-md-3 {% else %} col-sm-4 col-md-4 {% endif %} palette-item" style="padding-right:2px; padding-left:2px; width: 20%;">
+                <div class="color-palette-set">
+                  <div class="bg-gray color-palette" align="center" style="padding-right:0px; padding-bottom:5px;"><span style="font-size:50px; font-weight:800;">{{ home.email }}</span><br>{% trans "Mails" %}</div>
+                </div>
+              </div>
+              <div class="{% if request.user.HelplineUser.hl_role == 'Supervisor' %} col-sm-4 col-md-3 {% else %} col-sm-4 col-md-4 {% endif %} palette-item" style="padding-right:2px; padding-left:2px;">
+                <div class="color-palette-set">
+                  <div class="bg-gray color-palette" align="center" style=" padding-left:0px; padding-right:0px; padding-bottom:5px;"><span style="font-size:50px; font-weight:800;">{{ home.sms |default:0 }}</span><br>SMS</div>
+                </div>
+              </div>
+              <div class="{% if request.user.HelplineUser.hl_role == 'Supervisor' %} col-sm-4 col-md-3 {% else %} col-sm-4 col-md-4 {% endif %}" style="padding: 0px;">
+                <div class="color-palette-set">
+                  <div class="bg-aqua color-palette" align="center" style="border-radius:0px; padding-right:5px; padding-bottom:5px;"><a href="{% url 'qa' 'analysed' %}"><span style="font-size:50px; font-weight:800;">{{ qa_stat | floatformat:0 }}</span><br />Percentage (%)</a></div>
+                </div>
+              </div>
+              {% if request.user.HelplineUser.hl_role == 'Supervisor' %}
+              <div class="col-sm-3 col-md-3">
+                <div class="box-body no-padding">
+                  <table class="table table-condensed" onclick="window.location = '{% url 'web_presence' %}'">
+                    <tbody>
+                      <tr class="bg-green-active color-palette">
+                        <td width="56"><strong>Avail'e </strong></td>
+                        <td width="29"><span class="badge bg-blue">{{ home.call_stat.agents.online }}</span></td>
+                        <td width="29"><span class="badge bg-blue">{% widthratio status_count.available  status_count.total 100 %}%</span></td>
+                      </tr>
+                      <tr class="bg-yellow-active color-palette">
+                        <td><strong>Idle </strong></td>
+                        <td><span class="badge bg-blue">{{ home.call_stat.agents.offline }}</span></td>
+                        <td><span class="badge bg-blue">{% widthratio status_count.idle  status_count.total 100 %}%</span></td>
+                      </tr>
+                      <tr class="bg-red-active color-palette">
+                        <td><strong>Busy </strong></td>
+                        <td><span class="badge bg-blue">{{ status_count.oncall }}</span></td>
+                        <td><span class="badge bg-blue">{% widthratio status_count.oncall  status_count.total 100 %}%</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div> 
+
+
+
+              </div>
+              {% endif %}
+              <!-- /.col -->
+            </div>
+            <!-- ./box-body -->
+          </div>
+         {% endif %}          
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+         {% endblock box %}
+        <!-- /.row -->
+        <div class="row homedashboard">
+          <div class="col-md-12">
+            <div class="row">
+              <!-- Left col -->
+              <!-- /.col -->
+              {% if request.user.HelplineUser.hl_role != 'Caseworker' and request.user.HelplineUser.hl_role != 'Casemanager' %}
+              <div class="col-md-9 long">
+              {% else %}
+              <div class="col-md-12 long">
+              {% endif %}
+
+                <div class="row">
+                  <div class="col-md-6 col-sm-12 ">
+
+                    <!-- Bar chart -->
+                    <div class="box box-primary">
+                      <div class="box-header with-border">
+                        <i class="fa fa-bar-chart-o"></i>
+
+                        <h3 class="box-title">{% trans "Daily Cases" %}</h3>
+                        <div class="box-tools pull-right">
+                          <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                          </button>
+                          <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                        </div>
+                      </div>
+                      <div class="box-body">
+                        <div id="bar-chart" style="height: 300px;"></div>
+                      </div>
+                      <!-- /.box-body-->
+                    </div>
+                    <!-- /.box -->
+                  </div>
+                  <div class="col-md-6 col-sm-12" style="padding-left: 0px;">
+                    
+                    <div class="box box-primary">
+                      <div class="box-header with-border">
+                        <i class="fa fa-bar-chart-o"></i>
+
+                        <h3 class="box-title">{% trans "Cases Per Location" %}</h3>
+
+                        <div class="box-tools pull-right">
+                          <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                          </button>
+                          <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                        </div>
+                      </div>
+                      <div class="box-body">
+                        <div id="donut-chart" style="height: 300px;"></div>
+                      </div>
+                      <div class="box-footer">
+                        {% for ds in dt %}
+                        <span style="min-width:19%;color:#fff;background-color: {{ds.color}};float:left;padding:3px 4px !important;margin:2px 1px;">{{ds.label}}</span>
+                        {% endfor %}
+                      </div>
+                      <!-- /.box-body-->
+                    </div>
+                    <!-- /.box -->
+                  </div>
+                </div>
+
+
+              </div>
+              <!-- /col-md-9 -->
+
+              {% if request.user.HelplineUser.hl_role != 'Caseworker' and request.user.HelplineUser.hl_role != 'Casemanager' %}
+              <div class="col-md-3 short">
+                <!-- Info Boxes Style 2 -->
+                <div class="info-box bg-green">
+                  <a href="{% url 'dashboardreports' 'closed' 'cases' %}" style="color: #fff;">
+                  <span class="info-box-icon"><i class="ion ion-checkmark"></i></span>
+
+                  <div class="info-box-content">
+                    <span class="info-box-text">{% trans "Closed Cases" %}</span>
+                    <span class="info-box-number">{{ home.closed|intcomma }}</span>
+
+                    <div class="progress">
+                      <div class="progress-bar" style="width: {% widthratio home.closed home.total 100 %}%"></div>
+                    </div>
+                    <span class="progress-description">
+                      {% widthratio home.closed home.total 100 %}% {% trans "Closed Cases" %}
+                    </span>
+                  </div>
+                  <!-- /.info-box-content -->
+                </a>
+                </div>
+                <!-- /.info-box -->
+                <div class="info-box bg-yellow">
+                  <a href="{% url 'dashboardreports' 'escalated' 'case' %}" style="color: #fff;">
+                  <span class="info-box-icon"><i class="ion ion-ios-flag" md="md-flag"></i></span>
+
+                  <div class="info-box-content">
+                    <span class="info-box-text">{% trans "Escalated Cases" %}</span>
+                    <span class="info-box-number">{{ home.escalate |intcomma }}</span>
+
+                    <div class="progress">
+                      <div class="progress-bar" style="width: {% widthratio home.escalate home.total 100 %}%"></div>
+                    </div>
+                    <span class="progress-description">
+                      {% widthratio home.escalate home.total 100 %}% {% trans "Escalated Cases" %}
+                    </span>
+                  </div>
+                  <!-- /.info-box-content -->
+                </a>
+                </div>
+                <!-- /.info-box -->
+                <div class="info-box bg-aqua">
+                  <a href="{% url 'dashboardreports' 'pending' 'case' %}" style="color: #fff;">
+                  <span class="info-box-icon"><i class="ion-ios-clock-outline"></i></span>
+
+                  <div class="info-box-content">
+                    <span class="info-box-text">{% trans "Pending Cases" %}</span>
+                    <span class="info-box-number">{{ home.pending|intcomma }}</span>
+
+                    <div class="progress">
+                      <div class="progress-bar" style="width: {% widthratio home.pending home.total 100 %}%"></div>
+                    </div>
+                    <span class="progress-description">
+                      {% widthratio home.pending home.total 100 %}% {% trans "Pending Cases" %}
+                    </span>
+                  </div>
+                  <!-- /.info-box-content -->
+                  </a>
+                </div>
+                <!-- /.info-box -->
+                <div class="info-box bg-red">
+                  <a href="{% url 'dashboardreports' 'highpriority' 'case' %}" style="color: #fff;">
+                  <span class="info-box-icon"><i class="ion-ios-clock-outline"></i></span>
+
+                  <div class="info-box-content">
+                    <span class="info-box-text">{% trans "High Priority Cases" %}</span>
+                    <span class="info-box-number">{{ home.high_priority |intcomma }}</span>
+
+                    <div class="progress">
+                      <div class="progress-bar" style="width: {% widthratio home.high_priority home.total 100 %}%"></div>
+                      }
+                    </div>
+                    <span class="progress-description">
+                      {% widthratio home.high_priority home.total 100 %}% {% trans "Critical Cases" %}
+                    </span>
+                  </div>
+                  <!-- /.info-box-content -->
+                </a>
+                </div>
+                <!-- /.info-box -->
+
+              </div>
+              <!-- /.col -->
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        {% if request.user.HelplineUser.hl_role == 'Caseworkerxx' %}
+        <div class="row">
+
+          <div class="col-md-12" >
+            <div class="row home-pallete">
+              <div class="col-sm-4 col-md-2 palette-item">
+                <div class="color-palette-set">
+                  <div class="bg-blue color-palette" align="center" onclick="window.location = '{% url 'dashboardreports' 'totalcalls' %}?datetime_range={{ home.midnight_string }} - {{ home.now_string }}'"><span style="font-size:50px; font-weight:800;">{{ home.total_calls }} </span><br>{% trans "Total Cases" %}</div>
+                </div>
+              </div>
+              <!-- /.col -->
+              <div class="col-sm-4 col-md-2 palette-item">
+                <div class="color-palette-set">
+                  <div class="bg-aqua color-palette" align="center" style="padding-right:5px; padding-bottom:5px;" onclick="window.location = '{% url 'dashboardreports' 'answeredcalls' %}?datetime_range={{ home.midnight_string }} - {{ home.now_string }}'"><span style="font-size:50px; font-weight:800;">{{ home.answered_calls }}</span><br>{% trans "Total Cases Closed" %}</div>
+                  <!--div class="bg-light-blue-active color-palette"><span>Active</span></div-->
+                </div>
+              </div>
+              <!-- /.col -->
+              <div class="col-sm-4 col-md-2 palette-item">
+                <div class="color-palette-set">
+                  <div class="bg-red color-palette" align="center" style="padding-right:5px; padding-bottom:5px;"><span style="font-size:50px; font-weight:800;">{{ home.missed_calls }} </span><br>{% trans "Total Cases Pending" %}</div>
+
+                  <!--div class="bg-light-blue-active color-palette"><span>Active</span></div-->
+                </div>
+              </div>
+              <!-- /.col -->
+              <div class="col-sm-4 col-md-2 palette-item" onclick="window.location = '{% url 'dashboardreports' 'voicemails' %}?datetime_range={{ home.midnight_string }} - {{ home.now_string }}'">
+                <div class="color-palette-set">
+                  <!--div class="bg-light-blue disabled color-palette"><span>Disabled</span></div-->
+                  <div class="bg-yellow color-palette" align="center" style="padding-right:5px; padding-bottom:5px;"><span style="font-size:50px; font-weight:800;">{{ home.voice_mails }} </span><br>{% trans "Total Cases Escalated" %}</div>
+                  <!--div class="bg-light-blue-active color-palette"><span>Active</span></div-->
+                </div>
+              </div>
+              <!-- /.col -->
+              <div class="col-sm-4 col-md-2 palette-item">
+                <div class="color-palette-set">
+                  <!--div class="bg-light-blue disabled color-palette"><span>Disabled</span></div-->
+                  <div class="bg-gray color-palette" align="center" style="padding-right:5px; padding-bottom:5px;"><span style="font-size:50px; font-weight:800;">{{ home.number_tickets }}</span><br>{% trans "Follow Up" %}</div>
+                  <!--div class="bg-light-blue-active color-palette"><span>Active</span></div-->
+                </div>
+              </div>
+              <!-- /.col -->
+              <div class="col-sm-4 col-md-2 palette-item">
+                <div class="color-palette-set">
+                  <!--div class="bg-light-blue disabled color-palette"><span>Disabled</span></div-->
+                  <div class="bg-gray color-palette" align="center" style=" padding-right:5px; padding-bottom:5px;"><span style="font-size:50px; font-weight:800;">{{ home.total_sms }}</span><br>SMS</div>
+                  <!--div class="bg-light-blue-active color-palette"><span>Active</span></div-->
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+        {% endif %}
+      </section>
+      <!-- /.content -->
+      {% endblock content %}
+      {% block script_end %}
+<!-- FLOT CHARTS -->
+<script src="{% static "AdminLTE/plugins/flot/jquery.flot.min.js" %}"></script>
+<!-- FLOT RESIZE PLUGIN - allows the chart to redraw when the window is resized -->
+<script src="{% static "AdminLTE/plugins/flot/jquery.flot.resize.min.js" %}"></script>
+<!-- FLOT PIE PLUGIN - also used to draw donut charts -->
+<script src="{% static "AdminLTE/plugins/flot/jquery.flot.pie.min.js" %}"></script>
+<!-- FLOT CATEGORIES PLUGIN - Used to draw bar charts -->
+<script src="{% static "AdminLTE/plugins/flot/jquery.flot.categories.min.js" %}"></script>
+<script type="text/javascript">
+  
+    /*
+     * BAR CHART
+     * ---------
+     */
+    data = []
+
+
+    var bar_data = {
+      data: {{ gdata|safe }}/*[["January", 10], ["February", 8], ["March", 4], ["April", 13], ["May", 17], ["June", 9]]*/,
+      color: "#3c8dbc"
+    };
+    $.plot("#bar-chart", [bar_data], {
+      grid: {
+        borderWidth: 0.1,
+        borderColor: "#f3f3f3",
+        tickColor: "#f3f3f3"
+      },
+      series: {
+        bars: {
+          show: true,
+          barWidth: 0.1,
+          align: "center"
+        }
+      },
+      xaxis: {
+        mode: "categories",
+        tickLength: 0
+      }
+    });
+    /* END BAR CHART */
+
+
+
+    /*
+     * DONUT CHART
+     * -----------
+     */
+    var dData = {{ dt|safe }}
+    var donutData = []
+    var i = 0;
+    for(var key in dData){
+      var x = 0
+      var dk = {};
+      if(dData.hasOwnProperty(key)){
+        var ds = dData[key]
+        for(var keys in ds){
+         dk[keys] = ds[keys]
+        }
+      }
+      donutData[i] = dk
+      i++
+      
+    }
+
+    $.plot("#donut-chart", donutData, {
+      series: {
+        pie: {
+          show: true,
+          radius: 1,
+          innerRadius: 0.5,
+          label: {
+            show: true,
+            radius: 2 / 3,
+            formatter: labelFormatter,
+            threshold: 0.1
+          }
+
+        }
+      },
+      legend: {
+        show: false
+      }
+    });
+    /*
+     * END DONUT CHART
+     */
+
+
+       /*
+   * Custom Label formatter
+   * ----------------------
+   */
+  function labelFormatter(label,series) {
+    return '<div style="font-size:13px; text-align:center; padding:2px; color: #fff; font-weight: 600; z-index:500;">'
+        + label
+        + "<br>"
+        + Math.round(series.percent) + "%</div>";
+  }
+</script>
+{% endblock script_end %}

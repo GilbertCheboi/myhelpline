@@ -1,0 +1,6 @@
+sudo apt-get update \
+    && sudo apt-get install -y wget lsb-core \
+    && sudo apt-get install -y binutils libproj-dev gdal-bin memcached libmemcached-dev python-pip \
+    python-dev python-virtualenv git libssl-dev libpq-dev gfortran libatlas-base-dev libjpeg-dev libxml2-dev libxslt1-dev zlib1g-dev \
+    python-software-properties ghostscript openjdk-9-jre libffi-dev libssl-dev rabbitmq-server \
+    pkg-config gcc libtool automake

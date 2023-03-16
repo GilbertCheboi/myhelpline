@@ -1,0 +1,230 @@
+{% extends 'helpline/base.html' %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block box %}
+{% endblock box %}
+{% block treeview_reports %}active{% endblock treeview_reports %}
+
+{% block navbar_nav %}
+<li class="dropdown messages-menu">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+    <i class="fa fa-bookmark"></i>{% trans "Average Talk Time" %}: {{ dashboard_stats.att.hours }}:{{ dashboard_stats.att.min }}:{{ dashboard_stats.att.seconds }}
+  </a>
+</li>
+<!-- Messages: style can be found in dropdown.less-->
+<li class="dropdown messages-menu">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+    <i class="fa fa-bookmark"></i>{% trans "Average Wait Time" %}: {{ dashboard_stats.awt.hours }}:{{ dashboard_stats.awt.min }}:{{ dashboard_stats.awt.seconds }}
+  </a>
+</li>
+
+<!-- Messages: style can be found in dropdown.less-->
+<li class="dropdown messages-menu">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+    <i class="fa fa-clock-o"></i>  <span id="clock">0:00 AM</span>
+  </a>
+  <ul class="dropdown-menu">
+    <li class="header">
+      {% if request.user.chlusers.chlstatus == 'Busy' %}
+      <a href="{% url 'queue_log' %}"><i class="fa fa-circle text-danger"></i> {% trans "Busy" %}</a>
+      {% elif request.user.chlusers.chlstatus == 'Idle' %}
+      <a href="{% url 'queue_log' %}"><i class="fa fa-exclamation-triangle text-warning"></i> {% trans "Idle" %}</a>
+      {% elif request.user.chlusers.chlstatus == 'Available' %}
+      <a href="{% url 'queue_log' %}"><i class="fa fa-circle text-success"></i> {% trans "Online" %}</a>
+      {% elif request.user.chlusers.chlstatus == 'OnCall' %}
+      <a href="{% url 'queue_log' %}"><i class="fa fa-circle text-danger"></i> {% trans "OnCall" %}</a>
+      {% endif %}
+      <span id="durations"></span>
+    </li>
+    <li class="footer">
+    </li>
+  </ul>
+</li>
+
+{% endblock navbar_nav %}
+
+{% block content %}
+<link rel='stylesheet' type='text/css' href='{{call_url}}/demo_rpt/RPT.css'>
+</head>
+<body style="font-size:12px; font-family:Helvetica,Arial,sans-serif; line-height:14px; padding:0; margin:0; color:black; background-color:white; ">
+
+<script src="{{call_url}}/demo_rpt/RPT.js"></script>
+<script>
+function _rptshow ()
+{
+        var p = document.getElementById ("vrpt");
+        var el = document.getElementById ("oo");
+        RPT.show (p, el.value);
+}
+window.onload = function()
+{ 
+  var intt = setInterval(function(){
+    $('.yy').addClass('row')
+    $('.b20').addClass('col-md-4')
+    $('.b40').addClass('col-md-8')
+    clearInterval(intt)
+  },200)
+
+  var p = document.getElementById ("vrpt");
+  RPT.init ();
+  RPT.show (p, "{{call_url}}/rpt/?xaxis=select_category");
+}
+
+
+</script>
+
+<style>
+div.scrollmenu {
+  overflow: auto;
+  white-space: nowrap;
+}
+
+tbody tr td{
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+max-width:300px;
+/*display:inline-block;*/
+}
+
+</style>
+<section class="content-header">
+  <h1>
+    {% trans "REPORT" %} <i class="fa fa-angle-right"></i> {{ title }}
+  </h1>
+</section>
+<!-- Main content -->
+<section class="content">
+  <div class="box">
+    <div class="box-header with-border">
+      <div class="col-md-12 report-filters">
+        <div id="form_collapse" class="in" style="height: auto;">
+          <!-- Filter Form -->
+          <form action="#">
+            <!-- Date and time range -->
+            <script>
+              $(function() {
+                $('#datetimerange').daterangepicker({
+                 opens: 'left',
+                 timePicker: true,
+                 locale: {
+                  format: 'DD/MM/YYYY h:mm A'
+                }
+
+              }, function(start, end, label) {
+               console.log("A new date selection was made: " + start.format('M/DD hh:mm A') + ' to ' + end.format('M/DD hh:mm A'));
+             });
+              });
+            </script>
+
+
+            <!-- <div class="form-group col-md-4" style="padding-left: 0px;">
+              <label>Choose Date and time Range:</label>
+              <div class="input-group">
+                <div class="input-group-addon">
+                  <i class="fa fa-calendar"></i>
+                </div>
+                {{ form.datetime_range }}
+              </div><!-- /.input group ->
+            </div><!-- /.form group --> 
+            <div class="form-group  col-md-4">
+              <label>Select X-Axis</label>
+              <div class="input-group">
+                <div class="input-group-addon">
+                  <i class="fa fa-exclamation-triangle"></i>
+                </div>
+                <div>
+                  <select id="x_axis" class="form-control _axis">
+                    {% for field in fields %}
+                    <option value="{{field.name}}">{{field.r_name}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="form-group  col-md-4">
+              <label>Select Y-Axis</label>
+              <div class="input-group">
+                <div class="input-group-addon">
+                  <i class="fa fa-exclamation-triangle"></i>
+                </div>
+                <div>
+                  <select id="y_axis" class="form-control _axis">
+                    {% for field in fields %}
+                    <option value="{{field.name}}">{{field.r_name}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- <div class="form-group col-md-4">
+              <div class="input-group" style="padding-top: 5px;">
+                <input type="submit" value="Fetch Reports" id="total-calls-search-btn" class="btn btn-success btn-md btn-flat" onclick="sendtoReportFactory();">
+              </div><!-- /.input group --
+            </div> -->
+          </form>
+          <!-- End Filter Form -->
+        </div>
+      </div>
+    </div>
+    <div class="box-body">
+      <div class="row">
+        <div class="col-md-12">
+          <div id='vrpt'></div>
+        </div>
+      </div>
+    </div>
+    <!-- /.row -->
+  </div>
+  <!-- ./box-body -->
+</section>
+
+{% endblock content %}
+{% block script_end %}
+<script type="text/javascript">
+  $('._axis').on('change',function(){
+    var _id = $(this).attr('id')
+    var _val = $(this).val()
+    var query_str = ""
+
+    var p = document.getElementById ("vrpt");
+    RPT.init ();
+
+    if(_id == 'x_axis'){
+      if(_val != ""){
+        query_str += "xaxis=" + _val
+      }
+      if($('#y_axis').val() != ""){
+        query_str += query_str != "" ? "&":""
+        query_str += "yaxis=" + $('#y_axis').val()
+      }
+
+      if($('#y_axis').val() == _val){
+        alert("Selected similar values for both axes, you will have X-Axis");
+        query_str = "xaxis=" + _val
+      }
+    }else{
+      if(_val != ""){
+        query_str += "yaxis=" + _val
+      }
+
+      if($('#x_axis').val() != ""){
+        query_str += query_str != "" ? "&":""
+        query_str += "xaxis=" + $('#x_axis').val()
+      }
+
+      if($('#x_axis').val() == _val){
+        alert("Selected similar values for both axes, you will have X-Axis");
+        query_str = "xaxis=" + _val
+      }
+    }
+
+    query_str = query_str == "" ? "" : "?" + query_str
+    RPT.show (p, "{{call_url}}/rpt/" + query_str);
+  })
+
+</script>
+<script src="{{call_url}}/demo_rpt/chart_2_8_0.js"></script>
+{% endblock script_end %}
